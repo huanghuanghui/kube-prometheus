@@ -1,3 +1,32 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: monitoring-grafana-pvc
+  namespace: monitoring
+spec:
+  storageClassName: openebs-jiva-default
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: monitoring-grafana-plugins-pvc
+  namespace: monitoring
+spec:
+  storageClassName: openebs-jiva-default
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -148,8 +177,9 @@ spec:
         runAsUser: 65534
       serviceAccountName: grafana
       volumes:
-      - emptyDir: {}
-        name: grafana-storage
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: monitoring-grafana-pvc
       - name: grafana-datasources
         secret:
           secretName: grafana-datasources
@@ -231,5 +261,6 @@ spec:
       - name: grafana-config
         secret:
           secretName: grafana-config
-      - emptyDir: {}
+      - persistentVolumeClaim:
+          claimName: monitoring-grafana-plugins-pvc
         name: tmp-plugins
